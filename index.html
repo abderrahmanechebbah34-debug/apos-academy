@@ -30,9 +30,9 @@
         .upload-box { border: 2px dashed #334155; padding: 30px; text-align: center; border-radius: 8px; cursor: pointer; transition: 0.3s; }
         .upload-box:hover { border-color: var(--accent); background: rgba(59, 130, 246, 0.05); }
         .btn { padding: 10px 20px; background: var(--accent); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 10px; }
-        .results-box { background: #0f172a; padding: 15px; border-radius: 8px; max-height: 300px; overflow-y: auto; font-family: monospace; font-size: 13px; margin-top: 15px; border: 1px solid #1e293b; }
-        .log-safe { color: var(--success); }
-        .log-danger { color: var(--danger); font-weight: bold; background: rgba(239, 68, 68, 0.1); padding: 4px; display: block; margin: 4px 0; border-radius: 4px; }
+        .results-box { background: #0f172a; padding: 15px; border-radius: 8px; max-height: 350px; overflow-y: auto; font-family: monospace; font-size: 13px; margin-top: 15px; border: 1px solid #1e293b; }
+        .log-safe { color: var(--success); font-weight: bold; }
+        .log-danger { color: var(--danger); font-weight: bold; background: rgba(239, 68, 68, 0.1); padding: 6px; display: block; margin: 6px 0; border-radius: 4px; border-left: 4px solid var(--danger); }
     </style>
 </head>
 <body>
@@ -48,22 +48,22 @@
         <div id="dashboard">
             <div class="header">
                 <h1>APOS ACADEMY - SMART FORENSIC ANALYZER</h1>
-                <p>Automated Bugreport & Oil Detection System v2.0</p>
+                <p>Advanced Anti-Cheat & Oil Detection System v2.1</p>
             </div>
             <div class="card">
                 <h3>01 / UPLOAD BUGREPORT OR LOG FILE</h3>
                 <div class="upload-box" onclick="document.getElementById('file-input').click()">
-                    <p style="font-size: 16px; font-weight: bold;">📁 Click to select Bugreport / TXT file</p>
-                    <p style="color: var(--text-muted); font-size: 12px; margin-top: 5px;">Supports text logs, bugreports, or system dumps</p>
+                    <p style="font-size: 16px; font-weight: bold;">📁 Click to select Log / TXT file</p>
+                    <p style="color: var(--text-muted); font-size: 12px; margin-top: 5px;">Upload extracted text logs for accurate scanning</p>
                     <input type="file" id="file-input" style="display: none;" onchange="handleFile(event)">
                 </div>
                 <p id="file-name" style="margin-top: 10px; color: var(--accent); font-size: 14px;"></p>
-                <button class="btn" onclick="analyzeFile()">ANALYZE NOW (AI FILTER)</button>
+                <button class="btn" onclick="analyzeFile()">ANALYZE NOW (AI SMART FILTER)</button>
             </div>
             <div class="card">
                 <h3>02 / INTELLIGENT SCAN RESULTS & OIL DETECTION</h3>
                 <div id="results" class="results-box">
-                    <span style="color: var(--text-muted);">No file analyzed yet. Upload a bugreport to start deep scan...</span>
+                    <span style="color: var(--text-muted);">No file analyzed yet. Upload a clean text log to start deep oil check...</span>
                 </div>
             </div>
         </div>
@@ -92,29 +92,57 @@
         function analyzeFile() {
             const resultsBox = document.getElementById('results');
             if(!fileContent) {
-                resultsBox.innerHTML = "<span style='color: var(--danger);'>[!] Please select a log or bugreport file first!</span>";
+                resultsBox.innerHTML = "<span style='color: var(--danger);'>[!] Please select a log file first!</span>";
                 return;
             }
-            resultsBox.innerHTML = "<span style='color: yellow;'>[~] Analyzing and scanning for hidden oils, scripts, and mods... Please wait.</span>";
+            resultsBox.innerHTML = "<span style='color: yellow;'>[~] Running Deep Smart AI Filter... Scanning for actual oils and cheats. Please wait.</span>";
             setTimeout(() => {
                 const lines = fileContent.split('\n');
                 let findings = [];
-                const keywords = ["yuno", "mod", "hack", "cheat", "script", "ghost", "panel", "xapk", "admaster", "mediafire", "inject", "bypass"];
+                
+                // الكلمات الحقيقية للغش والزيوت التي تبحث عنها الأكاديمية
+                const cheatKeywords = [
+                    "proxy", "aimbot", "aimlock", "aim neck", "aim-neck", "script", 
+                    "mod", "cheat", "yuno", "ghost", "panel", "inject", "bypass", 
+                    "macro", "headshot tool", "regedit", "ffh4x"
+                ];
+
+                // الكلمات النظامية التي يجب تجاهلها تماماً لتجنب التنبيهات الكاذبة
+                const ignoreList = [
+                    "vendor", "camera", "ispahal", "modulemetadata", "service", 
+                    "google", "android", "fingerprint", "bluetooth", "default"
+                ];
+
                 lines.forEach(line => {
                     let lowerLine = line.toLowerCase();
-                    keywords.forEach(kw => {
-                        if(lowerLine.includes(kw)) { findings.push(line.trim()); }
-                    });
+                    
+                    // التحقق مما إذا كانت السطر يحتوي على كلمة نظام يجب تجاهلها
+                    let shouldIgnore = ignoreList.some(ignore => lowerLine.includes(ignore));
+                    
+                    if(!shouldIgnore) {
+                        cheatKeywords.forEach(kw => {
+                            if(lowerLine.includes(kw)) {
+                                findings.push(line.trim());
+                            }
+                        });
+                    }
                 });
+
                 let htmlOutput = "";
                 if(findings.length > 0) {
-                    htmlOutput += `<span class="log-danger">[!] ALERT: Found ${findings.length} suspicious traces / oils!</span><br>`;
-                    findings.forEach(f => { htmlOutput += `<span class="log-danger">🚨 SUSPICIOUS MATCH: ${f}</span>`; });
+                    htmlOutput += `<span class="log-danger">[!] ALERT: Found ${findings.length} dangerous traces / oils detected!</span><br>`;
+                    findings.forEach(f => { 
+                        htmlOutput += `<span class="log-danger">🚨 OIL / CHEAT MATCH: ${escapeHtml(f)}</span>`; 
+                    });
                 } else {
-                    htmlOutput += `<span class="log-safe">[+] Clean trace! No known mods, scripts, or oils detected in this file.</span>`;
+                    htmlOutput += `<span class="log-safe">[+] CLEAN DEVICE! No proxy, aimbot, or suspicious oils found in this log. Player is clean!</span>`;
                 }
                 resultsBox.innerHTML = htmlOutput;
             }, 1000);
+        }
+
+        function escapeHtml(text) {
+            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
         }
     </script>
 </body>
