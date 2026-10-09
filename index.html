@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>APOS ACADEMY - ELITE FORENSIC CHECKER</title>
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --card-bg: #131b2e;
+            --accent: #3b82f6;
+            --danger: #ef4444;
+            --success: #22c55e;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-main); padding: 20px; }
+        .container { max-width: 900px; margin: 0 auto; }
+        #auth-screen { background: var(--card-bg); padding: 40px; border-radius: 12px; text-align: center; margin-top: 100px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        #auth-screen h2 { margin-bottom: 20px; color: var(--accent); }
+        #auth-screen input { padding: 12px; width: 80%; max-width: 300px; border-radius: 6px; border: 1px solid #334155; background: #0f172a; color: white; margin-bottom: 15px; font-size: 16px; }
+        #auth-screen button { padding: 12px 25px; background: var(--accent); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        #dashboard { display: none; }
+        .header { text-align: center; margin-bottom: 30px; padding: 20px; background: var(--card-bg); border-radius: 12px; border-bottom: 4px solid var(--accent); }
+        .header h1 { font-size: 24px; letter-spacing: 1px; color: #fff; }
+        .header p { color: var(--text-muted); font-size: 14px; margin-top: 5px; }
+        .card { background: var(--card-bg); padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        .card h3 { margin-bottom: 15px; font-size: 18px; color: var(--accent); border-bottom: 1px solid #1e293b; padding-bottom: 8px; }
+        .upload-box { border: 2px dashed #334155; padding: 30px; text-align: center; border-radius: 8px; cursor: pointer; transition: 0.3s; }
+        .upload-box:hover { border-color: var(--accent); background: rgba(59, 130, 246, 0.05); }
+        .btn { padding: 10px 20px; background: var(--accent); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 10px; }
+        .results-box { background: #0f172a; padding: 15px; border-radius: 8px; max-height: 300px; overflow-y: auto; font-family: monospace; font-size: 13px; margin-top: 15px; border: 1px solid #1e293b; }
+        .log-safe { color: var(--success); }
+        .log-danger { color: var(--danger); font-weight: bold; background: rgba(239, 68, 68, 0.1); padding: 4px; display: block; margin: 4px 0; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="auth-screen">
+            <h2>🔐 APOS ACADEMY SECURE ACCESS</h2>
+            <p style="color: var(--text-muted); margin-bottom: 20px;">Enter your manager / checker password to continue.</p>
+            <input type="password" id="pass-input" placeholder="Enter password...">
+            <br>
+            <button onclick="checkPassword()">ENTER</button>
+            <p id="error-msg" style="color: var(--danger); margin-top: 15px; font-size: 14px;"></p>
+        </div>
+        <div id="dashboard">
+            <div class="header">
+                <h1>APOS ACADEMY - SMART FORENSIC ANALYZER</h1>
+                <p>Automated Bugreport & Oil Detection System v2.0</p>
+            </div>
+            <div class="card">
+                <h3>01 / UPLOAD BUGREPORT OR LOG FILE</h3>
+                <div class="upload-box" onclick="document.getElementById('file-input').click()">
+                    <p style="font-size: 16px; font-weight: bold;">📁 Click to select Bugreport / TXT file</p>
+                    <p style="color: var(--text-muted); font-size: 12px; margin-top: 5px;">Supports text logs, bugreports, or system dumps</p>
+                    <input type="file" id="file-input" style="display: none;" onchange="handleFile(event)">
+                </div>
+                <p id="file-name" style="margin-top: 10px; color: var(--accent); font-size: 14px;"></p>
+                <button class="btn" onclick="analyzeFile()">ANALYZE NOW (AI FILTER)</button>
+            </div>
+            <div class="card">
+                <h3>02 / INTELLIGENT SCAN RESULTS & OIL DETECTION</h3>
+                <div id="results" class="results-box">
+                    <span style="color: var(--text-muted);">No file analyzed yet. Upload a bugreport to start deep scan...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        const CORRECT_PASS = "apos2026";
+        function checkPassword() {
+            const inputVal = document.getElementById('pass-input').value;
+            if(inputVal === CORRECT_PASS) {
+                document.getElementById('auth-screen').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'block';
+            } else {
+                document.getElementById('error-msg').innerText = "[-] Incorrect password! Access denied.";
+            }
+        }
+        let fileContent = "";
+        function handleFile(event) {
+            const file = event.target.files[0];
+            if(file) {
+                document.getElementById('file-name').innerText = "Loaded File: " + file.name;
+                const reader = new FileReader();
+                reader.onload = function(e) { fileContent = e.target.result; };
+                reader.readAsText(file);
+            }
+        }
+        function analyzeFile() {
+            const resultsBox = document.getElementById('results');
+            if(!fileContent) {
+                resultsBox.innerHTML = "<span style='color: var(--danger);'>[!] Please select a log or bugreport file first!</span>";
+                return;
+            }
+            resultsBox.innerHTML = "<span style='color: yellow;'>[~] Analyzing and scanning for hidden oils, scripts, and mods... Please wait.</span>";
+            setTimeout(() => {
+                const lines = fileContent.split('\n');
+                let findings = [];
+                const keywords = ["yuno", "mod", "hack", "cheat", "script", "ghost", "panel", "xapk", "admaster", "mediafire", "inject", "bypass"];
+                lines.forEach(line => {
+                    let lowerLine = line.toLowerCase();
+                    keywords.forEach(kw => {
+                        if(lowerLine.includes(kw)) { findings.push(line.trim()); }
+                    });
+                });
+                let htmlOutput = "";
+                if(findings.length > 0) {
+                    htmlOutput += `<span class="log-danger">[!] ALERT: Found ${findings.length} suspicious traces / oils!</span><br>`;
+                    findings.forEach(f => { htmlOutput += `<span class="log-danger">🚨 SUSPICIOUS MATCH: ${f}</span>`; });
+                } else {
+                    htmlOutput += `<span class="log-safe">[+] Clean trace! No known mods, scripts, or oils detected in this file.</span>`;
+                }
+                resultsBox.innerHTML = htmlOutput;
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
